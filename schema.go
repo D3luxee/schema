@@ -8,6 +8,10 @@ import (
 	"github.com/raintank/schema"
 )
 
+//Format will be as below:
+// $Prefix.$hostname.$metric
+//
+
 type MetricData struct {
 	*schema.MetricData
 }
@@ -40,9 +44,28 @@ func (m *MetricData) AddTag(key, value string) {
 	m.Tags = append(m.Tags, key+"="+value)
 }
 
+//Get the lookup id used by cyclone / eye
 func (m *MetricData) LookupID() string {
 	h := sha256.New()
-	h.Write([]byte(m.GetTag("hostname")))
-	h.Write([]byte(m.Name))
+	h.Write([]byte(m.Hostname()))
+	h.Write([]byte(m.MetricName()))
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+//Get the name of the Metric without the prefix and hostname
+func (m *MetricData) MetricName() string {
+	name := strings.SplitAfterN(m.Name, ".", 3)
+	if len(name) == 3 {
+		return name[2]
+	}
+	return ""
+}
+
+//Get the Hostname associated with this metric
+func (m *MetricData) Hostname() string {
+	name := strings.Split(m.Name, ".")
+	if len(name) > 1 {
+		return name[1]
+	}
+	return ""
 }
