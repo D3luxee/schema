@@ -13,7 +13,7 @@ import (
 //
 
 type MetricData struct {
-	*schema.MetricData
+	schema.MetricData
 }
 
 func (m *MetricData) GetTagMap() map[string]string {
